@@ -503,6 +503,15 @@ class ShellTests(unittest.TestCase):
             self.assertEqual(len(raw), offset)
             self.assertEqual(dimensions, actual_dimensions)
 
+    def test_profile_photo_is_a_responsive_circle(self):
+        css = self.source("assets/css/main.css")
+        portrait = re.search(r'\.hero-photo, \.portrait\s*\{([^}]+)', css).group(1)
+        self.assertRegex(portrait, r'aspect-ratio:\s*1\s*;')
+        self.assertRegex(portrait, r'border-radius:\s*50%\s*;')
+        self.assertRegex(portrait, r'object-fit:\s*cover\s*;')
+        self.assertRegex(portrait, r'width:\s*min\(')
+        self.assertRegex(self.source("index.html"), r'<img class="hero-photo"[^>]+alt="Ricardo Viana"')
+
     def test_head_emits_bilingual_metadata_with_english_defaults(self):
         head = self.source("_includes/head.html")
         self.assertIn('page.title.pt', head)
