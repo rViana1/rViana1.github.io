@@ -1,0 +1,7 @@
+{%- if include.start and include.start != '' -%}
+  {% include date_label.html d=include.start %}
+  {%- if include.end and include.end != '' -%}
+    {%- if include.end != include.start %} – {% include date_label.html d=include.end %}{% endif -%}
+  {%- else %} – {% include i18n.html en="Present" pt="Atualidade" %}
+  {%- endif -%}
+{%- endif -%}

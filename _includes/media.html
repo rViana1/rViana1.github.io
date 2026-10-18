@@ -1,0 +1,7 @@
+<div class="media {{ include.class | escape }}">
+  {% if include.item.slug == 'codelp' %}
+  <img src="{{ '/images/projects/codelp/workspace.webp' | relative_url }}" alt="Codelp" width="1440" height="810" loading="lazy" decoding="async">
+  {% else %}
+  <span class="media-initials" aria-hidden="true">{{ include.item.title.en | slice: 0, 2 | upcase | escape }}</span>
+  {% endif %}
+</div>

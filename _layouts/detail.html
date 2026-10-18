@@ -1,0 +1,35 @@
+---
+layout: default
+---
+{% assign back_key = 'back_' | append: page.collection %}
+{% assign body_parts = content | split: '<!--pt-->' %}
+<article class="detail container section">
+  <header class="detail-hero">
+    <a class="back-link" href="{{ '/' | append: page.collection | append: '/' | relative_url }}">{% include icon.html name="arrow-left" %}{% include t.html k=back_key %}</a>
+    <div class="tags">{% include tags.html tags=page.tags %}</div>
+    <h1>{% include title.html item=page %}</h1>
+    <p class="detail-sub">{% include i18n.html en=page.subtitle.en pt=page.subtitle.pt %}</p>
+    {% if page.start %}<p class="meta">{% include period.html start=page.start end=page.end %}</p>{% endif %}
+    {% if page.status %}<p class="status">{% include t.html k=page.status %}</p>{% endif %}
+    <p class="lead">{% include i18n.html en=page.summary.en pt=page.summary.pt %}</p>
+    {% if page.slug == 'codelp' %}{% include media.html item=page class="detail-cover" %}{% endif %}
+  </header>
+  <div class="detail-grid">
+    <div>
+      {% if page.highlights.size > 0 %}
+      <section class="panel">
+        <h2>{% include t.html k="highlights" %}</h2>
+        <ul class="check-list">{% for highlight in page.highlights %}<li>{% include icon.html name="check" %}<span>{% include i18n.html en=highlight.en pt=highlight.pt %}</span></li>{% endfor %}</ul>
+      </section>
+      {% endif %}
+      <div class="prose" data-l="en" lang="en">{{ body_parts[0] }}</div>
+      <div class="prose" data-l="pt" lang="pt">{{ body_parts[1] }}</div>
+    </div>
+    {% if page.tech or page.links %}
+    <aside class="detail-side">
+      {% if page.tech %}<section class="panel"><h2>{% include t.html k="tech_stack" %}</h2><ul class="chips">{% for tech in page.tech %}<li>{{ tech | escape }}</li>{% endfor %}</ul></section>{% endif %}
+      {% if page.links %}<section class="panel"><h2>{% include t.html k="links" %}</h2><ul class="link-list">{% for link in page.links %}<li><a href="{{ link.url | escape }}" target="_blank" rel="noopener noreferrer">{% include i18n.html en=link.label.en pt=link.label.pt %}{% include icon.html name="external" %}</a></li>{% endfor %}</ul></section>{% endif %}
+    </aside>
+    {% endif %}
+  </div>
+</article>

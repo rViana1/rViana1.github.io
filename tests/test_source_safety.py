@@ -1,5 +1,7 @@
 from pathlib import Path
+from html.parser import HTMLParser
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -253,6 +255,158 @@ class PortfolioContentTests(unittest.TestCase):
             for field in ("name", "level", "note"):
                 self.bilingual(item[field])
         self.assertEqual([], check_source.scan(self.root))
+
+
+class ShellTests(unittest.TestCase):
+    root = Path(__file__).resolve().parents[1]
+
+    def source(self, name):
+        path = self.root / name
+        self.assertTrue(path.is_file(), f"Missing shell component: {name}")
+        return path.read_text(encoding="utf-8")
+
+    def test_shell_has_one_main_skip_link_and_language_agnostic_content(self):
+        layout = self.source("_layouts/default.html")
+        self.assertEqual(1, len(re.findall(r"<main\b", layout)))
+        self.assertIn('id="main-content"', layout)
+        self.assertIn('href="#main-content"', layout)
+        self.assertIn('{{ content }}', layout)
+        self.assertNotIn('page.collection', layout)
+        self.assertIn('lang="en"', layout)
+        translation = self.source("_includes/i18n.html")
+        for language in ("en", "pt"):
+            self.assertIn(f'data-l="{language}"', translation)
+            self.assertIn(f'lang="{language}"', translation)
+
+    def test_controls_have_labels_and_navigation_has_full_name(self):
+        header = self.source("_includes/header.html")
+        self.assertIn('Ricardo Viana', header)
+        class Controls(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.buttons = []
+            def handle_starttag(self, tag, attrs):
+                if tag == "button":
+                    self.buttons.append(dict(attrs))
+        parser = Controls()
+        parser.feed(header)
+        self.assertGreaterEqual(len(parser.buttons), 3)
+        for button in parser.buttons:
+            self.assertEqual("button", button.get("type"))
+            self.assertTrue(button.get("aria-label"))
+        self.assertIn('aria-controls="site-nav"', header)
+        self.assertIn('aria-expanded="false"', header)
+
+    def test_focus_targets_reduced_motion_and_no_js_content(self):
+        css = self.source("assets/css/main.css")
+        self.assertIn(':focus-visible', css)
+        self.assertRegex(css, r'min-height:\s*44px')
+        self.assertRegex(css, r'min-width:\s*44px')
+        self.assertIn('prefers-reduced-motion: reduce', css)
+        self.assertIn('html[data-lang="en"] [data-l="pt"]', css)
+        self.assertIn('html[data-lang="pt"] [data-l="en"]', css)
+        self.assertNotRegex(css, r'(?m)^\[data-l[^\n]*display:\s*none')
+
+    def test_both_palettes_meet_text_contrast(self):
+        css = self.source("assets/css/main.css")
+        palettes = re.findall(r'(?:\:root|\[data-theme="light"\])\s*\{([^}]+)', css)
+        self.assertEqual(2, len(palettes))
+        def luminance(hex_value):
+            values = [int(hex_value[i:i+2], 16) / 255 for i in (1, 3, 5)]
+            linear = [v / 12.92 if v <= .04045 else ((v + .055) / 1.055) ** 2.4 for v in values]
+            return sum(v * weight for v, weight in zip(linear, (.2126, .7152, .0722)))
+        for palette in palettes:
+            tokens = dict(re.findall(r'--([\w-]+):\s*(#[\da-fA-F]{6})', palette))
+            for foreground in ('text', 'muted', 'primary'):
+                for background in ('bg', 'surface'):
+                    a, b = sorted((luminance(tokens[foreground]), luminance(tokens[background])))
+                    self.assertGreaterEqual((b + .05) / (a + .05), 4.5, (foreground, background))
+
+    def test_shell_has_no_remote_assets_or_inherited_tracking(self):
+        for name in ('_includes/head.html', '_includes/header.html', '_includes/footer.html', '_includes/skill.html', 'assets/js/main.js', 'assets/css/main.css'):
+            text = self.source(name)
+            self.assertNotRegex(text, r'(?:src=|@import|url\()[\s\"\']*https?://')
+            self.assertNotRegex(text.lower(), r'gtag|analytics|devicon|zaask')
+        self.assertEqual([], check_source.scan(self.root))
+
+    def test_media_derivatives_have_no_identifying_metadata(self):
+        for name, dimensions in (("images/profile/ricardo-viana.webp", (600, 800)), ("images/projects/codelp/workspace.webp", (1440, 810))):
+            path = self.root / name
+            self.assertTrue(path.is_file(), f"Missing derivative: {name}")
+            raw = path.read_bytes()
+            self.assertEqual(b'RIFF', raw[:4])
+            self.assertEqual(b'WEBP', raw[8:12])
+            offset = 12
+            chunks = []
+            actual_dimensions = None
+            while offset < len(raw):
+                kind = raw[offset:offset+4]
+                size = int.from_bytes(raw[offset+4:offset+8], 'little')
+                chunks.append(kind)
+                if kind == b'VP8 ':
+                    payload = raw[offset+8:offset+8+size]
+                    self.assertEqual(b'\x9d\x01\x2a', payload[3:6])
+                    actual_dimensions = tuple(int.from_bytes(payload[i:i+2], 'little') & 0x3fff for i in (6, 8))
+                offset += 8 + size + size % 2
+            self.assertFalse({b'EXIF', b'XMP ', b'IPTC', b'ICCP'} & set(chunks))
+            self.assertEqual(len(raw), offset)
+            self.assertEqual(dimensions, actual_dimensions)
+
+    def test_language_theme_and_menu_behaviour(self):
+        script = self.source("assets/js/main.js")
+        harness = r'''
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const source = SOURCE;
+function run(language, saved = {}, blocked = false) {
+  const listeners = {};
+  const node = () => ({ dataset: {}, attrs: {}, hidden: true, focused: false,
+    setAttribute(k,v) { this.attrs[k] = String(v); },
+    addEventListener(k,fn) { this[k] = fn; }, focus() { this.focused = true; } });
+  const root = node(), en = node(), pt = node(), theme = node(), menu = node(), nav = node();
+  en.dataset.setLang = 'en'; pt.dataset.setLang = 'pt';
+  nav.contains = () => true;
+  const document = { documentElement: root,
+    querySelectorAll: () => [en, pt],
+    querySelector: s => ({'#theme-toggle': theme, '#menu-toggle': menu, '#site-nav': nav})[s],
+    addEventListener: (k,fn) => listeners[k] = fn };
+  vm.runInNewContext(source, {document, navigator: {language},
+    localStorage: {getItem(k) { if(blocked) throw Error(); return saved[k]; }, setItem(k,v) { if(blocked) throw Error(); saved[k] = v; }},
+    matchMedia: () => ({matches: false})});
+  return {root, en, pt, theme, menu, nav, saved, listeners};
+}
+let page = run('pt-PT');
+assert.equal(page.root.dataset.lang, 'pt');
+assert.equal(page.root.lang, 'pt');
+page.en.click();
+assert.equal(page.root.dataset.lang, 'en');
+assert.equal(page.saved['rv-language'], 'en');
+assert.equal(page.en.attrs['aria-pressed'], 'true');
+page.theme.click();
+assert.equal(page.saved['rv-theme'], 'light');
+page.menu.click();
+assert.equal(page.menu.attrs['aria-expanded'], 'true');
+assert.equal(page.nav.hidden, false);
+page.listeners.keydown({key: 'Escape'});
+assert.equal(page.menu.attrs['aria-expanded'], 'false');
+assert.equal(page.menu.focused, true);
+page.menu.focused = false;
+page.menu.click(); page.menu.click();
+assert.equal(page.menu.focused, true);
+page = run('pt-BR', {'rv-language': 'en', 'rv-theme': 'light'});
+assert.equal(page.root.dataset.lang, 'en');
+assert.equal(page.root.dataset.theme, 'light');
+page = run('fr', {'rv-language': 'invalid', 'rv-theme': 'invalid'});
+assert.equal(page.root.dataset.lang, 'en');
+assert.equal(page.root.dataset.theme, 'dark');
+page = run('pt-PT', {}, true);
+assert.equal(page.root.dataset.lang, 'pt');
+page.en.click(); page.theme.click();
+assert.equal(page.root.dataset.lang, 'en');
+console.log('language/theme/menu checks passed');
+'''.replace('SOURCE', json.dumps(script))
+        result = subprocess.run(['node', '-e', harness], capture_output=True, text=True)
+        self.assertEqual(0, result.returncode, result.stderr)
 
 
 if __name__ == "__main__":

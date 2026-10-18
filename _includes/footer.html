@@ -1,0 +1,10 @@
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p>© {{ site.time | date: '%Y' }} Ricardo Viana</p>
+    <div class="footer-links">
+      <a href="mailto:{{ site.data.contacts.email | escape }}">{% include icon.html name="mail" %}Email</a>
+      <a href="{{ site.data.contacts.linkedin | escape }}" target="_blank" rel="noopener noreferrer">LinkedIn{% include icon.html name="external" %}</a>
+      <a href="{{ site.data.contacts.github | escape }}" target="_blank" rel="noopener noreferrer">GitHub{% include icon.html name="external" %}</a>
+    </div>
+  </div>
+</footer>

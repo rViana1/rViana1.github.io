@@ -1,0 +1,4 @@
+{%- for key in include.tags -%}
+  {%- assign tag = site.data.tags[key] -%}
+  <span class="tag">{% if tag %}{% include i18n.html en=tag.en pt=tag.pt %}{% else %}{{ key | escape }}{% endif %}</span>
+{%- endfor -%}

@@ -1,0 +1,9 @@
+{%- assign date_parts = include.d | append: '' | split: '-' -%}
+{%- if date_parts.size > 1 -%}
+  {%- assign month_index = date_parts[1] | plus: 0 | minus: 1 -%}
+  {%- assign months_en = 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec' | split: ',' -%}
+  {%- assign months_pt = 'jan,fev,mar,abr,mai,jun,jul,ago,set,out,nov,dez' | split: ',' -%}
+  <time datetime="{{ include.d | escape }}"><span data-l="en" lang="en">{{ months_en[month_index] }} {{ date_parts[0] }}</span><span data-l="pt" lang="pt">{{ months_pt[month_index] }} {{ date_parts[0] }}</span></time>
+{%- else -%}
+  {{ date_parts[0] | escape }}
+{%- endif -%}

@@ -1,0 +1,10 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>{% if page.title.en %}{{ page.title.en | escape }} · {% elsif page.title %}{{ page.title | escape }} · {% endif %}Ricardo Viana</title>
+  <meta name="description" content="{{ page.summary.en | default: site.data.profile.bio.en | escape }}">
+  <link rel="icon" href="{{ '/assets/favicon.svg' | relative_url }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+  <script src="{{ '/assets/js/main.js' | relative_url }}" defer></script>
+</head>

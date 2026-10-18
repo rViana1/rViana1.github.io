@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+  {% include head.html %}
+  <body>
+    <a class="skip-link" href="#main-content">{% include t.html k="skip" %}</a>
+    {% include header.html %}
+    <main id="main-content" tabindex="-1">{{ content }}</main>
+    {% include footer.html %}
+  </body>
+</html>
