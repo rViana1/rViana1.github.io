@@ -112,6 +112,37 @@ class SourceSafetyTests(unittest.TestCase):
                 self.write("admin/_experience/example.md", text)
                 self.assertTrue(check_source.scan(self.root))
 
+    def test_translatable_fields_cannot_be_replaced_with_scalars(self):
+        source_root = Path(__file__).resolve().parents[1]
+        cases = (
+            ("admin/_data/ui.yml", "cta_contact:\n  en: Get in touch\n  pt: Entrar em contacto", "cta_contact: Get in touch"),
+            ("admin/_data/profile.yml", "headline:\n  en: Junior Software Engineer\n  pt: Engenheiro de Software Júnior", "headline: Junior Software Engineer"),
+            ("admin/_data/profile.yml", "bio:\n  en: Computer Engineering graduate with a data engineering internship at Medana.ai. I build software projects and am continuing my studies with a master's in Informatics.\n  pt: Licenciado em Engenharia Informática, com um estágio em engenharia de dados na Medana.ai. Desenvolvo projetos de software e continuo a minha formação num mestrado em Informática.", "bio: Computer Engineering graduate"),
+            ("admin/_data/profile.yml", "focus:\n  en: Software development and data engineering\n  pt: Desenvolvimento de software e engenharia de dados", "focus: Software development"),
+            ("admin/_data/contacts.yml", "location:\n  en: Portugal\n  pt: Portugal", "location: Portugal"),
+            ("admin/_data/nav.yml", "  label:\n    en: Home\n    pt: Início", "  label: Home"),
+            ("admin/_data/skills.yml", "- group:\n    en: Data engineering\n    pt: Engenharia de dados", "- group: Data engineering"),
+            ("admin/_data/skills.yml", "  evidence:\n    en: Applied during the Medana.ai internship.\n    pt: Aplicação durante o estágio na Medana.ai.", "  evidence: Applied during the internship"),
+            ("admin/_data/languages.yml", "- name:\n    en: Portuguese\n    pt: Português", "- name: Portuguese"),
+            ("admin/_data/languages.yml", "  level:\n    en: Native\n    pt: Nativo", "  level: Native"),
+            ("admin/_data/languages.yml", "  note:\n    en: Mother tongue.\n    pt: Língua materna.", "  note: Mother tongue"),
+            ("admin/_data/tags.yml", "internship:\n  en: Internship\n  pt: Estágio", "internship: Internship"),
+            ("admin/_projects/codelp.md", "subtitle:\n  en: Repository understanding tool · In development\n  pt: Ferramenta de compreensão de repositórios · Em desenvolvimento", "subtitle: Repository understanding tool"),
+            ("admin/_projects/codelp.md", "  - label:\n      en: Source code on GitHub\n      pt: Código-fonte no GitHub", "  - label: Source code on GitHub"),
+        )
+        for index, (relative, original, replacement) in enumerate(cases):
+            with self.subTest(path=relative, replacement=replacement):
+                source = (source_root / relative).read_text(encoding="utf-8")
+                self.assertEqual(1, source.count(original))
+                self.write(f"{index}/{relative}", source.replace(original, replacement))
+                self.assertTrue(check_source.scan(self.root / str(index)))
+
+    def test_nontranslatable_scalar_fields_remain_valid(self):
+        source_root = Path(__file__).resolve().parents[1]
+        for relative in ("admin/_data/profile.yml", "admin/_data/nav.yml", "admin/_data/skills.yml", "admin/_projects/codelp.md", "admin/_experience/medana-ai.md"):
+            self.write(relative, (source_root / relative).read_text(encoding="utf-8"))
+        self.assertEqual([], check_source.scan(self.root))
+
 
 class PortfolioContentTests(unittest.TestCase):
     root = Path(__file__).resolve().parents[1]
@@ -145,6 +176,8 @@ class PortfolioContentTests(unittest.TestCase):
         profile = self.yaml(self.root / "admin/_data/profile.yml")
         self.assertEqual("Ricardo Viana", profile["name"])
         self.bilingual(profile["headline"])
+        self.bilingual(profile["bio"])
+        self.bilingual(profile["focus"])
         self.assertEqual("Junior Software Engineer", profile["headline"]["en"])
         self.assertFalse({"phone", "address", "birth_date", "date_of_birth"} & profile.keys())
 
@@ -176,6 +209,8 @@ class PortfolioContentTests(unittest.TestCase):
                     self.assertTrue(metadata["highlights"])
                     for highlight in metadata["highlights"]:
                         self.bilingual(highlight)
+                    for link in metadata.get("links", []):
+                        self.bilingual(link["label"])
                     body = path.read_text(encoding="utf-8").split("---", 2)[2]
                     self.assertEqual(1, body.count("<!--pt-->"))
                     self.assertTrue(all(len(part.strip()) > 30 for part in body.split("<!--pt-->")))
@@ -198,6 +233,9 @@ class PortfolioContentTests(unittest.TestCase):
             path = self.root / f"admin/_data/{name}.yml"
             self.yaml(path)
             self.assertEqual([], check_source.bilingual_problems(path.read_text(encoding="utf-8")))
+        for name in ("ui", "tags"):
+            for value in self.yaml(self.root / f"admin/_data/{name}.yml").values():
+                self.bilingual(value)
         skills = self.yaml(self.root / "admin/_data/skills.yml")
         self.assertEqual({
             "Java", "C#", "C", "JavaScript", "SQL", "Python", "Pandas", "regex", "OCR", "ETL",
@@ -211,6 +249,10 @@ class PortfolioContentTests(unittest.TestCase):
         self.assertEqual(["Portuguese", "English"], [item["name"]["en"] for item in languages])
         self.assertEqual("Native", languages[0]["level"]["en"])
         self.assertEqual("B2", languages[1]["cefr"])
+        for item in languages:
+            for field in ("name", "level", "note"):
+                self.bilingual(item[field])
+        self.assertEqual([], check_source.scan(self.root))
 
 
 if __name__ == "__main__":

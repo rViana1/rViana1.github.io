@@ -19,9 +19,17 @@ PRIVATE_KEY = re.compile(
     r"(?im)(?:^|[,{])\s*(?:-\s*)?[\"']?(?:street[_ -]?address|address|morada|date[_ -]?of[_ -]?birth|birth[_ -]?date|dob|data[_ -]?(?:de[_ -]?)?nascimento)[\"']?\s*:"
 )
 MAPPING = re.compile(r"^( *)(?:- )?([\w-]+):\s*(.*?)\s*$")
+TRANSLATABLE_FIELDS = {
+    "admin/_data/profile.yml": {"headline", "bio", "focus"},
+    "admin/_data/contacts.yml": {"location"},
+    "admin/_data/nav.yml": {"label"},
+    "admin/_data/skills.yml": {"group", "evidence"},
+    "admin/_data/languages.yml": {"name", "level", "note"},
+}
+TRANSLATABLE_ROOTS = {"admin/_data/ui.yml", "admin/_data/tags.yml"}
 
 
-def bilingual_problems(text: str, required_fields=()) -> list[str]:
+def bilingual_problems(text: str, required_fields=(), translatable_fields=(), translatable_roots=False) -> list[str]:
     """Validate the project's indented YAML en/pt sibling mappings."""
     # shortcut: indented YAML mappings only; extend if the authoring format changes.
     groups = {}
@@ -54,7 +62,7 @@ def bilingual_problems(text: str, required_fields=()) -> list[str]:
                         break
             groups.setdefault(parent, {})[key] = value not in {"", "''", '""', "null", "Null", "NULL", "~", "[]", "{}"} and not value.startswith("#")
         field = parent + (f"{key}@{index + 1}",)
-        if key in required_fields:
+        if key in required_fields or key in translatable_fields or (translatable_roots and not parent):
             groups.setdefault(field, {})
         stack.append((indent, field))
     return ["missing bilingual field" for _ in missing] + ["incomplete en/pt mapping" for values in groups.values() if not all(values.get(language) for language in ("en", "pt"))]
@@ -92,7 +100,8 @@ def scan(root: Path) -> list[str]:
                 text = front_matter.group(1) if front_matter else ""
             collection = any(part in {"_experience", "_education", "_projects", "_hobbies"} for part in relative.parts)
             required = {"title", "summary"} if collection else ()
-            problems.extend(f"{relative}: {problem}" for problem in bilingual_problems(text, required))
+            fields = {"title", "subtitle", "summary", "label"} if collection else TRANSLATABLE_FIELDS.get(relative.as_posix(), ())
+            problems.extend(f"{relative}: {problem}" for problem in bilingual_problems(text, required, fields, relative.as_posix() in TRANSLATABLE_ROOTS))
             if collection:
                 if not re.search(r"(?m)^highlights:\s*\n +-(?: +en:| +pt:)", text):
                     problems.append(f"{relative}: missing bilingual highlights")
