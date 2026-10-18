@@ -284,6 +284,13 @@ class PublicPageTests(unittest.TestCase):
         for text in ('site.data.profile', 'site.data.nav', 'project-card.html', 'contact-links.html', '/images/profile/ricardo-viana.webp'):
             self.assertIn(text, source)
 
+    def test_home_primary_action_links_to_experience(self):
+        source = (self.root / 'index.html').read_text()
+        self.assertIn('class="button button-primary" href="{{ \'/experience/\' | relative_url }}">{% include t.html k="cta_experience" %}', source)
+        self.assertIn('class="button" href="{{ \'/contacts/\' | relative_url }}">{% include t.html k="cta_contact" %}', source)
+        ui = self.yaml(self.root / 'admin/_data/ui.yml')
+        self.assertEqual({'en': 'View my experience', 'pt': 'Ver a minha experiência'}, ui['cta_experience'])
+
     def test_project_pages_reuse_featured_experience_urls(self):
         for name in ('index.html', 'projects.html'):
             path = self.root / name
