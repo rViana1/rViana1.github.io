@@ -1,0 +1,49 @@
+title: Ricardo Viana
+url: "https://rviana1.github.io"
+baseurl: ""
+timezone: Europe/Lisbon
+lang: en
+
+collections_dir: admin
+data_dir: admin/_data
+collections:
+  experience:
+    output: true
+    permalink: /experience/:name/
+  education:
+    output: true
+    permalink: /education/:name/
+  projects:
+    output: true
+    permalink: /projects/:name/
+  hobbies:
+    output: true
+    permalink: /hobbies/:name/
+
+defaults:
+  - scope: { path: "", type: experience }
+    values: { layout: detail }
+  - scope: { path: "", type: education }
+    values: { layout: detail }
+  - scope: { path: "", type: projects }
+    values: { layout: detail }
+  - scope: { path: "", type: hobbies }
+    values: { layout: detail }
+
+plugins:
+  - jekyll-sitemap
+
+exclude:
+  - README.md
+  - LICENSE
+  - Gemfile
+  - Gemfile.lock
+  - admin/README.md
+  - images/README.md
+  - tests
+  - tools
+  - .superpowers
+  - _site-test
+  - vendor
+  - .bundle
+  - node_modules

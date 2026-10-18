@@ -1,0 +1,13 @@
+_site*/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+vendor/
+.bundle/
+node_modules/
+.vscode/
+.idea/
+.DS_Store
+__pycache__/
+*.pyc
+.superpowers/
