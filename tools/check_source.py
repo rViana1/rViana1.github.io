@@ -14,7 +14,7 @@ IGNORED = {
     ".sass-cache", "tests", "tools", "vendor", "node_modules", ".bundle",
 }
 BINARY = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".woff", ".woff2", ".ttf", ".mp4", ".mp3", ".zip"}
-PHONE = re.compile(r"(?<![\w#])\+?\(?\d[\d ()+.\-]{7,}\d(?!\w)")
+PHONE = re.compile(r"(?<![\w#])\+?\(?\d(?:[ ()+.\-]*\d){8,14}(?!\w)")
 PRIVATE_KEY = re.compile(
     r"(?im)(?:^|[,{])\s*(?:-\s*)?[\"']?(?:street[_ -]?address|address|morada|date[_ -]?of[_ -]?birth|birth[_ -]?date|dob|data[_ -]?(?:de[_ -]?)?nascimento)[\"']?\s*:"
 )
@@ -74,7 +74,7 @@ def scan(root: Path) -> list[str]:
             continue
         if any(token.casefold() in text.casefold() for token in FORBIDDEN):
             problems.append(f"{relative}: forbidden inherited identity")
-        if any(9 <= sum(character.isdigit() for character in match.group()) <= 15 for match in PHONE.finditer(text)):
+        if PHONE.search(text):
             problems.append(f"{relative}: phone-shaped public value")
         if PRIVATE_KEY.search(text):
             problems.append(f"{relative}: private address or birth-date field")

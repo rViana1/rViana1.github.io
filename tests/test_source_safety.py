@@ -33,6 +33,16 @@ class SourceSafetyTests(unittest.TestCase):
                 self.write("index.html", f"<p>{value}</p>")
                 self.assertTrue(check_source.scan(self.root))
 
+    def test_adjacent_phone_numbers_are_detected_individually(self):
+        for value in ("912345678 923456789", "Call 912345678 (+351 923 456 789)"):
+            with self.subTest(value=value):
+                self.write("index.html", f"<p>{value}</p>")
+                self.assertIn("index.html: phone-shaped public value", check_source.scan(self.root))
+
+    def test_long_unbroken_identifier_is_not_a_phone_candidate(self):
+        self.write("index.html", "<p>1234567890123456</p>")
+        self.assertEqual([], check_source.scan(self.root))
+
     def test_private_field_names(self):
         for key in ("street_address", "street-address", "address", "morada", "date_of_birth", "birth_date", "dob", "data_nascimento"):
             with self.subTest(key=key):
