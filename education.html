@@ -1,0 +1,17 @@
+---
+layout: default
+permalink: /education/
+title:
+  en: Education
+  pt: Formação
+summary:
+  en: Higher education, professional qualifications and further training.
+  pt: Ensino superior, qualificação profissional e formação complementar.
+---
+<section class="container section">
+  <header class="detail-hero">
+    <h1>{% include title.html item=page %}</h1>
+    <p class="page-subtitle">{% include i18n.html en=page.summary.en pt=page.summary.pt %}</p>
+  </header>
+  {% include timeline.html collection="education" %}
+</section>

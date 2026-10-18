@@ -1,0 +1,55 @@
+---
+layout: default
+permalink: /
+title:
+  en: Home
+  pt: Início
+summary:
+  en: Ricardo Viana, Junior Software Engineer. Software projects, data engineering experience and education.
+  pt: Ricardo Viana, Engenheiro de Software Júnior. Projetos de software, experiência em engenharia de dados e formação.
+---
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <p class="eyebrow">{% include t.html k="hello" %}</p>
+      <h1>{{ site.data.profile.name | escape }}</h1>
+      <p class="lead">{% include i18n.html en=site.data.profile.headline.en pt=site.data.profile.headline.pt %}</p>
+      <p class="hero-bio">{% include i18n.html en=site.data.profile.bio.en pt=site.data.profile.bio.pt %}</p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="{{ '/projects/' | relative_url }}">{% include t.html k="cta_projects" %}{% include icon.html name="arrow-right" %}</a>
+        <a class="button" href="{{ '/contacts/' | relative_url }}">{% include t.html k="cta_contact" %}</a>
+      </div>
+      {% include contact-links.html %}
+    </div>
+    <img class="hero-photo" src="{{ '/images/profile/ricardo-viana.webp' | relative_url }}" alt="Ricardo Viana" width="600" height="800" fetchpriority="high" decoding="async">
+  </div>
+</section>
+<section class="container" aria-labelledby="evidence-heading">
+  <h2 class="sr-only" id="evidence-heading">{% include t.html k="highlights" %}</h2>
+  <div class="metrics">
+    <div class="metric"><strong>18/20</strong>{% include i18n.html en="Internship grade" pt="Classificação de estágio" %}</div>
+    <div class="metric"><strong>{% include i18n.html en="About 55,000" pt="Cerca de 55 000" %}</strong>{% include i18n.html en="Files in data preparation" pt="Ficheiros na preparação de dados" %}</div>
+    <div class="metric"><strong>{% include i18n.html en="More than 10" pt="Mais de 10" %}</strong>{% include i18n.html en="Automation scripts" pt="Scripts de automação" %}</div>
+  </div>
+</section>
+<section class="container section" aria-labelledby="work-heading">
+  <div class="section-heading">
+    <h2 id="work-heading">{% include t.html k="home_latest" %}</h2>
+    <a href="{{ '/projects/' | relative_url }}">{% include t.html k="see_all" %}{% include icon.html name="arrow-right" %}</a>
+  </div>
+  {% assign featured_experience = site.experience | where: 'featured_project', true %}
+  {% assign project_items = site.projects | concat: featured_experience | sort: 'project_order' %}
+  <div class="project-grid">{% for item in project_items %}{% include project-card.html item=item %}{% endfor %}</div>
+</section>
+<section class="container section" aria-labelledby="explore-heading">
+  <h2 id="explore-heading">{% include t.html k="home_explore" %}</h2>
+  <div class="tile-grid">
+    {% for item in site.data.nav %}{% if item.show and item.key != 'home' %}
+    {% assign subtitle_key = item.key | append: '_sub' %}
+    <article class="tile">
+      <h3><a href="{{ item.url | relative_url }}">{% include i18n.html en=item.label.en pt=item.label.pt %}{% include icon.html name="arrow-right" %}</a></h3>
+      <p>{% include t.html k=subtitle_key %}</p>
+    </article>
+    {% endif %}{% endfor %}
+  </div>
+</section>

@@ -1,0 +1,25 @@
+---
+layout: default
+permalink: /languages/
+title:
+  en: Languages
+  pt: Línguas
+summary:
+  en: Portuguese and English.
+  pt: Português e inglês.
+---
+<section class="container section">
+  <header class="detail-hero">
+    <h1>{% include title.html item=page %}</h1>
+    <p class="page-subtitle">{% include i18n.html en=page.summary.en pt=page.summary.pt %}</p>
+  </header>
+  <div class="card-grid">
+    {% for language in site.data.languages %}
+    <section class="panel">
+      <h2>{% include i18n.html en=language.name.en pt=language.name.pt %}</h2>
+      <p class="lead">{% include i18n.html en=language.level.en pt=language.level.pt %}{% if language.cefr %} · {{ language.cefr | escape }}{% endif %}</p>
+      <p>{% include i18n.html en=language.note.en pt=language.note.pt %}</p>
+    </section>
+    {% endfor %}
+  </div>
+</section>

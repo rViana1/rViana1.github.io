@@ -1,0 +1,14 @@
+<article class="project-card">
+  {% include media.html item=include.item %}
+  <div class="project-body">
+    <div class="tags">{% include tags.html tags=include.item.tags %}</div>
+    {% if include.heading == 2 %}
+    <h2><a href="{{ include.item.url | relative_url }}">{% include title.html item=include.item %}</a></h2>
+    {% else %}
+    <h3><a href="{{ include.item.url | relative_url }}">{% include title.html item=include.item %}</a></h3>
+    {% endif %}
+    {% if include.item.status %}<p class="status">{% include t.html k=include.item.status %}</p>{% endif %}
+    <p>{% include i18n.html en=include.item.summary.en pt=include.item.summary.pt %}</p>
+    <a class="back-link" href="{{ include.item.url | relative_url }}">{% include t.html k="view_details" %}<span class="sr-only"> — {% include title.html item=include.item %}</span>{% include icon.html name="arrow-right" %}</a>
+  </div>
+</article>

@@ -1,0 +1,17 @@
+---
+layout: default
+permalink: /hobbies/
+title:
+  en: Hobbies
+  pt: Interesses
+summary:
+  en: Roller hockey, beyond the keyboard.
+  pt: Hóquei em patins, para lá do teclado.
+---
+<section class="container section">
+  <header class="detail-hero">
+    <h1>{% include title.html item=page %}</h1>
+    <p class="page-subtitle">{% include i18n.html en=page.summary.en pt=page.summary.pt %}</p>
+  </header>
+  {% include timeline.html collection="hobbies" %}
+</section>

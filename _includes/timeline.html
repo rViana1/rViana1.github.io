@@ -1,0 +1,14 @@
+{% include sorted.html collection=include.collection %}
+<div class="timeline">
+  {% for item in sorted_items %}
+  <article class="timeline-item">
+    <div class="tags">{% include tags.html tags=item.tags %}</div>
+    <h2><a href="{{ item.url | relative_url }}">{% include title.html item=item %}</a></h2>
+    <p class="detail-sub">{% include i18n.html en=item.subtitle.en pt=item.subtitle.pt %}</p>
+    {% if item.start or item.end %}<p class="meta">{% include period.html start=item.start end=item.end %}</p>{% endif %}
+    {% if item.status %}<p class="status">{% include t.html k=item.status %}</p>{% endif %}
+    <p>{% include i18n.html en=item.summary.en pt=item.summary.pt %}</p>
+    <a class="back-link" href="{{ item.url | relative_url }}">{% include t.html k="view_details" %}<span class="sr-only"> — {% include title.html item=item %}</span>{% include icon.html name="arrow-right" %}</a>
+  </article>
+  {% endfor %}
+</div>

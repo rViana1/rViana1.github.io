@@ -257,6 +257,157 @@ class PortfolioContentTests(unittest.TestCase):
         self.assertEqual([], check_source.scan(self.root))
 
 
+class PublicPageTests(unittest.TestCase):
+    root = PortfolioContentTests.root
+    yaml = PortfolioContentTests.yaml
+    bilingual = PortfolioContentTests.bilingual
+
+    def test_navigation_pages_and_404_have_metadata_and_one_heading(self):
+        for route in ('/', '/experience/', '/education/', '/projects/', '/skills/', '/hobbies/', '/languages/', '/contacts/', '/404.html'):
+            name = 'index.html' if route == '/' else route.strip('/').removesuffix('.html') + '.html'
+            with self.subTest(route=route):
+                path = self.root / name
+                metadata = self.yaml(path, front_matter=True)
+                self.assertEqual(route, metadata['permalink'])
+                self.assertEqual('default', metadata['layout'])
+                self.bilingual(metadata['title'])
+                self.bilingual(metadata['summary'])
+                self.assertEqual(1, len(re.findall(r'<h1\b', path.read_text())))
+
+    def test_home_has_three_approved_metrics_and_shared_content(self):
+        path = self.root / 'index.html'
+        self.assertTrue(path.is_file(), 'Missing Home page')
+        source = path.read_text()
+        self.assertEqual(3, source.count('class="metric"'))
+        for text in ('18/20', '55,000', '55 000', 'More than 10', 'Mais de 10'):
+            self.assertIn(text, source)
+        for text in ('site.data.profile', 'site.data.nav', 'project-card.html', 'contact-links.html', '/images/profile/ricardo-viana.webp'):
+            self.assertIn(text, source)
+
+    def test_project_pages_reuse_featured_experience_urls(self):
+        for name in ('index.html', 'projects.html'):
+            path = self.root / name
+            self.assertTrue(path.is_file(), f'Missing {name}')
+            source = path.read_text()
+            self.assertIn("site.experience | where: 'featured_project', true", source)
+            self.assertIn("site.projects | concat: featured_experience | sort: 'project_order'", source)
+            self.assertIn('include project-card.html item=item', source)
+        card = self.root / '_includes/project-card.html'
+        self.assertTrue(card.is_file(), 'Missing project card')
+        source = card.read_text()
+        self.assertIn('include.item.url | relative_url', source)
+        self.assertIn('include.item.summary.en', source)
+        self.assertNotIn('/projects/medana', source)
+
+    def test_collection_lists_reuse_timeline_and_detail_navigation(self):
+        for collection in ('experience', 'education', 'hobbies'):
+            path = self.root / f'{collection}.html'
+            self.assertTrue(path.is_file(), f'Missing {collection} list')
+            self.assertIn(f'include timeline.html collection="{collection}"', path.read_text())
+        timeline = self.root / '_includes/timeline.html'
+        self.assertTrue(timeline.is_file(), 'Missing timeline')
+        self.assertIn('item.url | relative_url', timeline.read_text())
+        detail = (self.root / '_layouts/detail.html').read_text()
+        self.assertIn('site[page.collection]', detail)
+        self.assertIn('rel="prev"', detail)
+        self.assertIn('rel="next"', detail)
+        self.assertIn('page.cover', detail)
+
+    def test_end_only_period_has_a_rendering_branch_and_callers_allow_it(self):
+        period = (self.root / '_includes/period.html').read_text()
+        self.assertRegex(period, r"elsif include.end and include.end != ''[^%]*%}\s*{% include date_label.html d=include.end %}")
+        for name, item in (('_layouts/detail.html', 'page'), ('_includes/timeline.html', 'item')):
+            path = self.root / name
+            self.assertTrue(path.is_file(), f'Missing {name}')
+            self.assertIn(f'if {item}.start or {item}.end', path.read_text())
+
+
+class RenderedPublicPageTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        available = subprocess.run(['ruby', '-e', "require 'jekyll'; require 'kramdown-parser-gfm'; require 'jekyll-sitemap'"], capture_output=True, text=True)
+        if available.returncode:
+            raise unittest.SkipTest('Jekyll runtime unavailable; run with the installed project gems')
+        harness = r'''
+require 'jekyll'
+require 'json'
+require 'tmpdir'
+Dir.mktmpdir do |destination|
+  site = Jekyll::Site.new(Jekyll.configuration('source' => Dir.pwd, 'destination' => destination, 'quiet' => true))
+  site.reset
+  site.read
+  site.generate
+  site.render
+  pages = (site.pages + site.collections.values.flat_map(&:docs)).to_h { |page| [page.url, page.output] }
+  periods = [
+    '{% include period.html %}',
+    '{% include period.html end="2026-07" %}',
+    '{% include period.html start="2025-09" %}',
+    '{% include period.html start="2025-09" end="2026-05" %}',
+    '{% include period.html start="2026-07" end="2026-07" %}'
+  ].map { |source| Liquid::Template.parse(source).render!(site.site_payload, registers: { site: site }) }
+  puts JSON.generate('pages' => pages, 'periods' => periods)
+end
+'''
+        result = subprocess.run(['ruby', '-e', harness], cwd=PortfolioContentTests.root, capture_output=True, text=True)
+        if result.returncode:
+            raise AssertionError(result.stderr)
+        cls.rendered = json.loads(result.stdout)
+
+    def test_all_sections_render_one_heading_bilingual_metadata_and_content(self):
+        for route in ('/', '/experience/', '/education/', '/projects/', '/skills/', '/hobbies/', '/languages/', '/contacts/', '/404.html'):
+            with self.subTest(route=route):
+                html = self.rendered['pages'][route]
+                self.assertEqual(1, len(re.findall(r'<h1\b', html)))
+                self.assertNotIn('Liquid error', html)
+                self.assertRegex(html, r'<title[^>]*data-pt="[^"]+"')
+                self.assertIn('data-l="pt"', html)
+
+    def test_projects_have_three_cards_with_correct_detail_destinations(self):
+        for route in ('/', '/projects/'):
+            html = self.rendered['pages'][route]
+            self.assertEqual(3, html.count('class="project-card"'))
+            cards = re.findall(r'<article class="project-card">(.*?)</article>', html, re.S)
+            for card, destination in zip(cards, ('/experience/medana-ai/', '/projects/codelp/', '/projects/bionic-hand/')):
+                self.assertIn(f'href="{destination}"', card)
+            self.assertNotIn('/projects/medana-ai/', html)
+
+    def test_timelines_and_detail_navigation_cover_all_collections(self):
+        for collection, slugs in {
+            'experience': ['medana-ai', 'screen-printing', 'hockey-coach'],
+            'education': ['masters-informatics', 'computer-engineering', 'programming-technician', 'python-iefp'],
+            'projects': ['codelp', 'bionic-hand'],
+            'hobbies': ['roller-hockey'],
+        }.items():
+            listing = self.rendered['pages'][f'/{collection}/']
+            for i, slug in enumerate(slugs):
+                with self.subTest(collection=collection, slug=slug):
+                    self.assertIn(f'href="/{collection}/{slug}/"', listing)
+                    detail = self.rendered['pages'][f'/{collection}/{slug}/']
+                    self.assertIn(f'href="/{collection}/"', detail)
+                    self.assertEqual(len(slugs) > 1, 'aria-label="More in this section / Mais nesta secção"' in detail)
+                    self.assertEqual(i > 0, 'rel="prev"' in detail)
+                    self.assertEqual(i < len(slugs) - 1, 'rel="next"' in detail)
+                    if i:
+                        self.assertIn(f'rel="prev" href="/{collection}/{slugs[i-1]}/"', detail)
+                    if i < len(slugs) - 1:
+                        self.assertIn(f'rel="next" href="/{collection}/{slugs[i+1]}/"', detail)
+
+    def test_period_handles_missing_single_and_equal_endpoints(self):
+        empty, end_only, start_only, both, equal = self.rendered['periods']
+        self.assertEqual('', empty.strip())
+        self.assertIn('Jul 2026', end_only)
+        self.assertIn('jul 2026', end_only)
+        self.assertNotIn('Present', end_only)
+        self.assertIn('Present', start_only)
+        self.assertIn('Atualidade', start_only)
+        self.assertIn('Sep 2025', both)
+        self.assertIn('May 2026', both)
+        self.assertEqual(1, equal.count('<time'))
+        for route in ('/education/', '/education/computer-engineering/'):
+            self.assertIn('Jul 2026', self.rendered['pages'][route])
+
+
 class ShellTests(unittest.TestCase):
     root = Path(__file__).resolve().parents[1]
 

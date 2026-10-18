@@ -1,0 +1,22 @@
+---
+layout: default
+permalink: /contacts/
+title:
+  en: Contacts
+  pt: Contactos
+summary:
+  en: Reach me by email or find me on LinkedIn and GitHub.
+  pt: Contacta-me por email ou encontra-me no LinkedIn e no GitHub.
+---
+<section class="container section">
+  <header class="detail-hero">
+    <h1>{% include title.html item=page %}</h1>
+    <p class="page-subtitle">{% include i18n.html en=page.summary.en pt=page.summary.pt %}</p>
+  </header>
+  <div class="panel">
+    <h2>{% include t.html k="cta_contact" %}</h2>
+    <a class="back-link" href="mailto:{{ site.data.contacts.email | escape }}">{{ site.data.contacts.email | escape }}</a>
+    {% include contact-links.html %}
+    <p class="meta">{% include icon.html name="map-pin" %} {% include t.html k="location" %}: {% include i18n.html en=site.data.contacts.location.en pt=site.data.contacts.location.pt %}</p>
+  </div>
+</section>

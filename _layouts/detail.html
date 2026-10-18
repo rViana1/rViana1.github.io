@@ -9,10 +9,10 @@ layout: default
     <div class="tags">{% include tags.html tags=page.tags %}</div>
     <h1>{% include title.html item=page %}</h1>
     <p class="detail-sub">{% include i18n.html en=page.subtitle.en pt=page.subtitle.pt %}</p>
-    {% if page.start %}<p class="meta">{% include period.html start=page.start end=page.end %}</p>{% endif %}
+    {% if page.start or page.end %}<p class="meta">{% include period.html start=page.start end=page.end %}</p>{% endif %}
     {% if page.status %}<p class="status">{% include t.html k=page.status %}</p>{% endif %}
     <p class="lead">{% include i18n.html en=page.summary.en pt=page.summary.pt %}</p>
-    {% if page.slug == 'codelp' %}{% include media.html item=page class="detail-cover" %}{% endif %}
+    {% if page.cover or page.slug == 'codelp' %}{% include media.html item=page class="detail-cover" %}{% endif %}
   </header>
   <div class="detail-grid">
     <div>
@@ -32,4 +32,21 @@ layout: default
     </aside>
     {% endif %}
   </div>
+  {% assign collection_items = site[page.collection] | sort: 'order' %}
+  {% for item in collection_items %}
+    {% if item.url == page.url and collection_items.size > 1 %}
+      {% assign previous_index = forloop.index0 | minus: 1 %}
+      {% assign next_index = forloop.index0 | plus: 1 %}
+      <nav class="section-heading section" aria-label="More in this section / Mais nesta secção">
+        {% unless forloop.first %}
+        {% assign previous_item = collection_items[previous_index] %}
+        <a class="back-link" rel="prev" href="{{ previous_item.url | relative_url }}">{% include icon.html name="arrow-left" %}<span>{% include i18n.html en="Previous" pt="Anterior" %}: {% include title.html item=previous_item %}</span></a>
+        {% endunless %}
+        {% unless forloop.last %}
+        {% assign next_item = collection_items[next_index] %}
+        <a class="back-link" rel="next" href="{{ next_item.url | relative_url }}"><span>{% include i18n.html en="Next" pt="Seguinte" %}: {% include title.html item=next_item %}</span>{% include icon.html name="arrow-right" %}</a>
+        {% endunless %}
+      </nav>
+    {% endif %}
+  {% endfor %}
 </article>

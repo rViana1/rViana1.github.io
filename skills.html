@@ -1,0 +1,25 @@
+---
+layout: default
+permalink: /skills/
+title:
+  en: Skills
+  pt: Competências
+summary:
+  en: Technologies grouped by the experience that supports them.
+  pt: Tecnologias agrupadas pela experiência em que foram utilizadas.
+---
+<section class="container section">
+  <header class="detail-hero">
+    <h1>{% include title.html item=page %}</h1>
+    <p class="page-subtitle">{% include i18n.html en=page.summary.en pt=page.summary.pt %}</p>
+  </header>
+  <div class="card-grid">
+    {% for group in site.data.skills %}
+    <section class="panel">
+      <h2>{% include i18n.html en=group.group.en pt=group.group.pt %}</h2>
+      <p class="meta">{% include i18n.html en=group.evidence.en pt=group.evidence.pt %}</p>
+      <ul class="skills-list">{% for skill in group.items %}{% include skill.html s=skill %}{% endfor %}</ul>
+    </section>
+    {% endfor %}
+  </div>
+</section>

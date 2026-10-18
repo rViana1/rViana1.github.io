@@ -1,0 +1,16 @@
+---
+layout: default
+permalink: /404.html
+title:
+  en: Page not found
+  pt: Página não encontrada
+summary:
+  en: This page could not be found. Return to Ricardo Viana's portfolio.
+  pt: Não foi possível encontrar esta página. Voltar ao portefólio de Ricardo Viana.
+---
+<section class="container section">
+  <p class="eyebrow">404</p>
+  <h1>{% include title.html item=page %}</h1>
+  <p class="lead">{% include t.html k="notfound_text" %}</p>
+  <a class="button button-primary" href="{{ '/' | relative_url }}">{% include icon.html name="arrow-left" %}{% include t.html k="notfound_cta" %}</a>
+</section>
