@@ -352,7 +352,17 @@ class ShellTests(unittest.TestCase):
             self.assertEqual(len(raw), offset)
             self.assertEqual(dimensions, actual_dimensions)
 
-    def test_language_theme_and_menu_behaviour(self):
+    def test_head_emits_bilingual_metadata_with_english_defaults(self):
+        head = self.source("_includes/head.html")
+        self.assertIn('page.title.pt', head)
+        self.assertIn('page.summary.pt', head)
+        self.assertIn('site.data.profile.bio.pt', head)
+        self.assertRegex(head, r'<title[^>]*data-en="{{ title_en \| escape }}"[^>]*data-pt="{{ title_pt \| escape }}"[^>]*>{{ title_en \| escape }}</title>')
+        self.assertRegex(head, r'<meta name="description" content="{{ description_en \| escape }}"[^>]*data-en="{{ description_en \| escape }}"[^>]*data-pt="{{ description_pt \| escape }}"')
+        self.assertEqual(1, head.count('<title'))
+        self.assertEqual(1, head.count('name="description"'))
+
+    def test_language_metadata_theme_and_menu_behaviour(self):
         script = self.source("assets/js/main.js")
         harness = r'''
 const vm = require('node:vm');
@@ -364,24 +374,35 @@ function run(language, saved = {}, blocked = false) {
     setAttribute(k,v) { this.attrs[k] = String(v); },
     addEventListener(k,fn) { this[k] = fn; }, focus() { this.focused = true; } });
   const root = node(), en = node(), pt = node(), theme = node(), menu = node(), nav = node();
+  const title = node(), description = node();
+  title.dataset = {en: "Master's in Informatics · Ricardo Viana", pt: 'Mestrado em Informática · Ricardo Viana'};
+  description.dataset = {en: 'Continuing my studies in Informatics.', pt: 'Continuação dos estudos em Informática.'};
+  description.content = description.dataset.en;
   en.dataset.setLang = 'en'; pt.dataset.setLang = 'pt';
   nav.contains = () => true;
-  const document = { documentElement: root,
+  const document = { documentElement: root, title: title.dataset.en,
     querySelectorAll: () => [en, pt],
-    querySelector: s => ({'#theme-toggle': theme, '#menu-toggle': menu, '#site-nav': nav})[s],
+    querySelector: s => ({'#theme-toggle': theme, '#menu-toggle': menu, '#site-nav': nav, 'title': title, 'meta[name="description"]': description})[s],
     addEventListener: (k,fn) => listeners[k] = fn };
   vm.runInNewContext(source, {document, navigator: {language},
     localStorage: {getItem(k) { if(blocked) throw Error(); return saved[k]; }, setItem(k,v) { if(blocked) throw Error(); saved[k] = v; }},
     matchMedia: () => ({matches: false})});
-  return {root, en, pt, theme, menu, nav, saved, listeners};
+  return {root, en, pt, theme, menu, nav, saved, listeners, document, description};
 }
 let page = run('pt-PT');
 assert.equal(page.root.dataset.lang, 'pt');
 assert.equal(page.root.lang, 'pt');
+assert.equal(page.document.title, 'Mestrado em Informática · Ricardo Viana');
+assert.equal(page.description.content, 'Continuação dos estudos em Informática.');
 page.en.click();
 assert.equal(page.root.dataset.lang, 'en');
 assert.equal(page.saved['rv-language'], 'en');
 assert.equal(page.en.attrs['aria-pressed'], 'true');
+assert.equal(page.document.title, "Master's in Informatics · Ricardo Viana");
+assert.equal(page.description.content, 'Continuing my studies in Informatics.');
+page.pt.click();
+assert.equal(page.document.title, 'Mestrado em Informática · Ricardo Viana');
+assert.equal(page.description.content, 'Continuação dos estudos em Informática.');
 page.theme.click();
 assert.equal(page.saved['rv-theme'], 'light');
 page.menu.click();
@@ -396,6 +417,11 @@ assert.equal(page.menu.focused, true);
 page = run('pt-BR', {'rv-language': 'en', 'rv-theme': 'light'});
 assert.equal(page.root.dataset.lang, 'en');
 assert.equal(page.root.dataset.theme, 'light');
+assert.equal(page.document.title, "Master's in Informatics · Ricardo Viana");
+assert.equal(page.description.content, 'Continuing my studies in Informatics.');
+page = run('en-US', {'rv-language': 'pt'});
+assert.equal(page.document.title, 'Mestrado em Informática · Ricardo Viana');
+assert.equal(page.description.content, 'Continuação dos estudos em Informática.');
 page = run('fr', {'rv-language': 'invalid', 'rv-theme': 'invalid'});
 assert.equal(page.root.dataset.lang, 'en');
 assert.equal(page.root.dataset.theme, 'dark');

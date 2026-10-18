@@ -4,12 +4,16 @@
   const themeButton = document.querySelector('#theme-toggle');
   const menuButton = document.querySelector('#menu-toggle');
   const navigation = document.querySelector('#site-nav');
+  const title = document.querySelector('title');
+  const description = document.querySelector('meta[name="description"]');
   // Storage can be blocked by browser privacy settings; controls still work.
   const read = key => { try { return localStorage.getItem(key); } catch { return null; } };
   const save = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
   const setLanguage = language => {
     root.dataset.lang = language;
     root.lang = language;
+    document.title = title.dataset[language];
+    description.content = description.dataset[language];
     languageButtons.forEach(button => button.setAttribute('aria-pressed', button.dataset.setLang === language));
   };
   const storedLanguage = read('rv-language');
