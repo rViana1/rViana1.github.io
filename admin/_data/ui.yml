@@ -1,0 +1,114 @@
+skip:
+  en: Skip to content
+  pt: Saltar para o conteúdo
+menu:
+  en: Menu
+  pt: Menu
+hello:
+  en: Hi, I'm
+  pt: Olá, sou o
+cta_projects:
+  en: View my projects
+  pt: Ver os meus projetos
+cta_contact:
+  en: Get in touch
+  pt: Entrar em contacto
+home_latest:
+  en: Featured work
+  pt: Trabalho em destaque
+home_explore:
+  en: Explore
+  pt: Explorar
+experience_title:
+  en: Experience
+  pt: Experiência
+experience_sub:
+  en: Data engineering, technical work and coaching.
+  pt: Engenharia de dados, trabalho técnico e treino desportivo.
+projects_title:
+  en: Projects
+  pt: Projetos
+projects_sub:
+  en: A data engineering internship, a software project and a hardware prototype.
+  pt: Um estágio em engenharia de dados, um projeto de software e um protótipo de hardware.
+education_title:
+  en: Education
+  pt: Formação
+education_sub:
+  en: Higher education, professional qualifications and further training.
+  pt: Ensino superior, qualificação profissional e formação complementar.
+skills_title:
+  en: Skills
+  pt: Competências
+skills_sub:
+  en: Technologies grouped by the experience that supports them.
+  pt: Tecnologias agrupadas pela experiência em que foram utilizadas.
+hobbies_title:
+  en: Hobbies
+  pt: Interesses
+hobbies_sub:
+  en: Roller hockey, beyond the keyboard.
+  pt: Hóquei em patins, para lá do teclado.
+languages_title:
+  en: Languages
+  pt: Línguas
+languages_sub:
+  en: Portuguese and English.
+  pt: Português e inglês.
+contacts_title:
+  en: Contacts
+  pt: Contactos
+contacts_sub:
+  en: Reach me by email or find me on LinkedIn and GitHub.
+  pt: Contacta-me por email ou encontra-me no LinkedIn e no GitHub.
+email:
+  en: Email
+  pt: Email
+location:
+  en: Location
+  pt: Localização
+view_details:
+  en: View details
+  pt: Ver detalhes
+see_all:
+  en: See all
+  pt: Ver todos
+highlights:
+  en: Highlights
+  pt: Destaques
+tech_stack:
+  en: Technologies
+  pt: Tecnologias
+links:
+  en: Links
+  pt: Ligações
+back_experience:
+  en: All experience
+  pt: Toda a experiência
+back_projects:
+  en: All projects
+  pt: Todos os projetos
+back_education:
+  en: All education
+  pt: Toda a formação
+back_hobbies:
+  en: All hobbies
+  pt: Todos os interesses
+in_progress:
+  en: In progress
+  pt: Em curso
+active:
+  en: In development
+  pt: Em desenvolvimento
+completed:
+  en: Completed
+  pt: Concluído
+notfound_title:
+  en: Page not found
+  pt: Página não encontrada
+notfound_text:
+  en: This page could not be found.
+  pt: Não foi possível encontrar esta página.
+notfound_cta:
+  en: Back to home
+  pt: Voltar ao início

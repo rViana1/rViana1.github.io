@@ -1,0 +1,41 @@
+- group:
+    en: Data engineering
+    pt: Engenharia de dados
+  evidence:
+    en: Applied during the Medana.ai internship.
+    pt: Aplicação durante o estágio na Medana.ai.
+  items:
+    - name: Python
+    - name: Pandas
+    - name: regex
+    - name: OCR
+    - name: ETL
+    - name: CSV/JSON
+    - name: AWS Bedrock/LLM evaluation
+- group:
+    en: Programming and interfaces
+    pt: Programação e interfaces
+  evidence:
+    en: Academic learning and project experience.
+    pt: Aprendizagem académica e experiência em projetos.
+  items:
+    - name: Java
+    - name: C#
+    - name: C
+    - name: JavaScript
+    - name: React
+    - name: React Native
+    - name: HTML
+    - name: CSS
+- group:
+    en: Databases and development tools
+    pt: Bases de dados e ferramentas de desenvolvimento
+  evidence:
+    en: Academic learning and project experience.
+    pt: Aprendizagem académica e experiência em projetos.
+  items:
+    - name: SQL
+    - name: MySQL
+    - name: MongoDB
+    - name: Git
+    - name: Linux

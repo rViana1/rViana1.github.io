@@ -1,0 +1,19 @@
+- name:
+    en: Portuguese
+    pt: Português
+  level:
+    en: Native
+    pt: Nativo
+  note:
+    en: Mother tongue.
+    pt: Língua materna.
+- name:
+    en: English
+    pt: Inglês
+  level:
+    en: Upper intermediate
+    pt: Intermédio avançado
+  cefr: B2
+  note:
+    en: B2 overall level.
+    pt: Nível global B2.

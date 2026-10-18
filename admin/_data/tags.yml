@@ -1,0 +1,27 @@
+internship:
+  en: Internship
+  pt: Estágio
+job:
+  en: Work experience
+  pt: Experiência profissional
+personal:
+  en: Personal project
+  pt: Projeto pessoal
+prototype:
+  en: Prototype
+  pt: Protótipo
+degree:
+  en: Higher education
+  pt: Ensino superior
+qualification:
+  en: Professional qualification
+  pt: Qualificação profissional
+course:
+  en: Training
+  pt: Formação complementar
+hobby:
+  en: Sport
+  pt: Desporto
+coaching:
+  en: Coaching
+  pt: Treino desportivo

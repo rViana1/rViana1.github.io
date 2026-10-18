@@ -25,6 +25,7 @@ def bilingual_problems(text: str, required_fields=()) -> list[str]:
     """Validate the project's indented YAML en/pt sibling mappings."""
     # shortcut: indented YAML mappings only; extend if the authoring format changes.
     groups = {}
+    missing = set(required_fields)
     stack = [(-1, ())]
     lines = text.splitlines()
     for index, line in enumerate(lines):
@@ -35,7 +36,12 @@ def bilingual_problems(text: str, required_fields=()) -> list[str]:
         indent = len(spaces)
         while stack[-1][0] >= indent:
             stack.pop()
+        if line[indent:].startswith("- "):
+            stack.append((indent, stack[-1][1] + (f"item@{index + 1}",)))
+            indent += 2
         parent = stack[-1][1]
+        if not parent:
+            missing.discard(key)
         if key in {"en", "pt"}:
             value = value.split(" #", 1)[0].strip()
             if value in {"|", ">", "|-", ">-", "|+", ">+"}:
@@ -51,7 +57,7 @@ def bilingual_problems(text: str, required_fields=()) -> list[str]:
         if key in required_fields:
             groups.setdefault(field, {})
         stack.append((indent, field))
-    return ["incomplete en/pt mapping" for values in groups.values() if not all(values.get(language) for language in ("en", "pt"))]
+    return ["missing bilingual field" for _ in missing] + ["incomplete en/pt mapping" for values in groups.values() if not all(values.get(language) for language in ("en", "pt"))]
 
 
 def scan(root: Path) -> list[str]:
@@ -79,12 +85,19 @@ def scan(root: Path) -> list[str]:
         if PRIVATE_KEY.search(text):
             problems.append(f"{relative}: private address or birth-date field")
         if path.suffix.lower() in {".yml", ".yaml", ".md", ".markdown"}:
+            body = ""
             if path.suffix.lower() in {".md", ".markdown"}:
                 front_matter = re.match(r"\A---\s*\n(.*?)\n---(?:\s*\n|$)", text, re.DOTALL)
+                body = text[front_matter.end():] if front_matter else text
                 text = front_matter.group(1) if front_matter else ""
             collection = any(part in {"_experience", "_education", "_projects", "_hobbies"} for part in relative.parts)
             required = {"title", "summary"} if collection else ()
             problems.extend(f"{relative}: {problem}" for problem in bilingual_problems(text, required))
+            if collection:
+                if not re.search(r"(?m)^highlights:\s*\n +-(?: +en:| +pt:)", text):
+                    problems.append(f"{relative}: missing bilingual highlights")
+                if body.count("<!--pt-->") != 1 or not all(part.strip() for part in body.split("<!--pt-->")):
+                    problems.append(f"{relative}: missing en/pt long-form content")
     return problems
 
 

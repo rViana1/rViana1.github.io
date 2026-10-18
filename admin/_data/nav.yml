@@ -1,0 +1,48 @@
+- key: home
+  url: /
+  label:
+    en: Home
+    pt: Início
+  show: true
+- key: experience
+  url: /experience/
+  label:
+    en: Experience
+    pt: Experiência
+  show: true
+- key: projects
+  url: /projects/
+  label:
+    en: Projects
+    pt: Projetos
+  show: true
+- key: education
+  url: /education/
+  label:
+    en: Education
+    pt: Formação
+  show: true
+- key: skills
+  url: /skills/
+  label:
+    en: Skills
+    pt: Competências
+  show: true
+- key: hobbies
+  url: /hobbies/
+  label:
+    en: Hobbies
+    pt: Interesses
+  show: true
+- key: languages
+  url: /languages/
+  label:
+    en: Languages
+    pt: Línguas
+  show: true
+- key: contacts
+  url: /contacts/
+  label:
+    en: Contacts
+    pt: Contactos
+  show: true
