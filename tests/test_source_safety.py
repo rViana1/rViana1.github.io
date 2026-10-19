@@ -379,6 +379,15 @@ end
                 self.assertIn('<span data-l="en" lang="en">Last updated</span>', footer)
                 self.assertIn('<time datetime="2026-10-19">19/10/2026</time>', footer)
 
+    def test_header_photo_is_only_on_interior_pages(self):
+        for route in ('/', '/contacts/', '/education/computer-engineering/'):
+            with self.subTest(route=route):
+                header = re.search(r'<header class="site-header">.*?</header>', self.rendered['pages'][route], re.S).group()
+                photos = re.findall(r'<img\b[^>]*src="/images/profile/ricardo-viana.webp"[^>]*>', header)
+                self.assertEqual(0 if route == '/' else 1, len(photos))
+                if photos:
+                    self.assertIn('alt=""', photos[0])
+
     def test_projects_have_three_cards_with_correct_detail_destinations(self):
         for route in ('/', '/projects/'):
             html = self.rendered['pages'][route]
