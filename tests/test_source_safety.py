@@ -341,6 +341,7 @@ require 'json'
 require 'tmpdir'
 Dir.mktmpdir do |destination|
   site = Jekyll::Site.new(Jekyll.configuration('source' => Dir.pwd, 'destination' => destination, 'quiet' => true))
+  site.config['last_updated'] = '2026-10-19'
   site.reset
   site.read
   site.generate
@@ -369,6 +370,14 @@ end
                 self.assertNotIn('Liquid error', html)
                 self.assertRegex(html, r'<title[^>]*data-pt="[^"]+"')
                 self.assertIn('data-l="pt"', html)
+
+    def test_footer_shows_manual_update_date_in_both_languages(self):
+        for route in ('/', '/contacts/', '/education/computer-engineering/'):
+            with self.subTest(route=route):
+                footer = re.search(r'<footer\b.*?</footer>', self.rendered['pages'][route], re.S).group()
+                self.assertIn('<span data-l="pt" lang="pt">Última atualização</span>', footer)
+                self.assertIn('<span data-l="en" lang="en">Last updated</span>', footer)
+                self.assertIn('<time datetime="2026-10-19">19/10/2026</time>', footer)
 
     def test_projects_have_three_cards_with_correct_detail_destinations(self):
         for route in ('/', '/projects/'):

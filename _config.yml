@@ -3,6 +3,7 @@ url: "https://rviana1.github.io"
 baseurl: ""
 timezone: Europe/Lisbon
 lang: en
+last_updated: "2026-10-19"
 
 collections_dir: admin
 data_dir: admin/_data

@@ -41,6 +41,11 @@ under a subpath, use `--baseurl /portfolio` on both Jekyll and the generated che
 
 ## Edit content / editar conteúdo
 
+After a meaningful content update, change `last_updated` in `_config.yml` using
+`YYYY-MM-DD`. The footer displays it as `DD/MM/YYYY` in both languages.
+Após uma atualização relevante do conteúdo, altera `last_updated` em `_config.yml`
+no formato `AAAA-MM-DD`. O rodapé apresenta a data como `DD/MM/AAAA`.
+
 ```sh
 ${EDITOR:-vi} admin/_data/profile.yml admin/_data/contacts.yml
 ${EDITOR:-vi} admin/_data/nav.yml admin/_data/skills.yml admin/_data/languages.yml
