@@ -274,13 +274,11 @@ class PublicPageTests(unittest.TestCase):
                 self.bilingual(metadata['summary'])
                 self.assertEqual(1, len(re.findall(r'<h1\b', path.read_text())))
 
-    def test_home_has_three_approved_metrics_and_shared_content(self):
+    def test_home_has_shared_content_without_internship_metrics(self):
         path = self.root / 'index.html'
         self.assertTrue(path.is_file(), 'Missing Home page')
         source = path.read_text()
-        self.assertEqual(3, source.count('class="metric"'))
-        for text in ('18/20', '55,000', '55 000', 'More than 10', 'Mais de 10'):
-            self.assertIn(text, source)
+        self.assertNotIn('class="metric"', source)
         for text in ('site.data.profile', 'site.data.nav', 'project-card.html', 'contact-links.html', '/images/profile/ricardo-viana.webp'):
             self.assertIn(text, source)
 
