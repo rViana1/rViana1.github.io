@@ -1,7 +1,7 @@
 ---
 title:
-  en: Roller hockey coaching
-  pt: Treino de hóquei em patins
+  en: Roller hockey coach
+  pt: Treinador de hóquei em patins
 subtitle:
   en: Roller Hockey Coach
   pt: Treinador de Hóquei em Patins

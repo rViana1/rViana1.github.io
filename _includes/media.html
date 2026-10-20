@@ -1,6 +1,6 @@
-<div class="media {{ include.class | escape }}">
+<div class="media {{ include.class | escape }}{% if include.item.cover_fit == 'contain' %} media-logo{% endif %}">
   {% if include.item.cover %}
-  <img src="{{ include.item.cover | relative_url | escape }}" alt="{{ include.item.title.en | escape }} / {{ include.item.title.pt | escape }}" loading="lazy" decoding="async">
+  <img src="{{ include.item.cover | relative_url | escape }}" alt="{{ include.item.title.en | escape }} / {{ include.item.title.pt | escape }}" width="{{ include.item.cover_width }}" height="{{ include.item.cover_height }}" loading="lazy" decoding="async">
   {% elsif include.item.slug == 'codelp' %}
   <img src="{{ '/images/projects/codelp/workspace.webp' | relative_url }}" alt="Codelp" width="1440" height="810" loading="lazy" decoding="async">
   {% else %}

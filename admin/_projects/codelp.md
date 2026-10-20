@@ -12,7 +12,7 @@ order: 1
 project_order: 2
 status: active
 tags: [personal]
-tech: [Python]
+tech: [Python, AST, FastAPI, Pydantic, Typer, MCP, React, TypeScript, Vinext, Vite, Tailwind CSS, JSON]
 highlights:
   - en: Parses Python code into symbols, indexes and semantic chunks.
     pt: Analisa código Python para obter símbolos, índices e segmentos semânticos.
@@ -26,7 +26,9 @@ links:
       pt: Código-fonte no GitHub
     url: https://github.com/rViana1/codelp
 ---
-Codelp is an actively developed software project for understanding repositories. Its current parser supports Python: it discovers files, extracts imports and symbols, builds deterministic indexes and divides code into semantic chunks.
+## How it works
+
+Codelp is an actively developed software project for understanding repositories. Its current parser supports Python: it discovers files, extracts imports and symbols with Python AST, builds deterministic indexes and divides code into chunks associated with their source locations.
 
 The project persists knowledge with stable identities and history, detects changes and supports selective incremental analysis. A knowledge graph helps explore dependencies, duplicates, similarity and evolution. Retrieval produces context with traceable sources, using optional embeddings or a deterministic lexical fallback.
 
@@ -34,7 +36,9 @@ The same runtime is available through a command-line interface, MCP, a REST API 
 
 <!--pt-->
 
-O Codelp é um projeto de software em desenvolvimento ativo para compreender repositórios. O analisador atual suporta Python: descobre ficheiros, extrai importações e símbolos, constrói índices determinísticos e divide o código em segmentos semânticos.
+## Como funciona
+
+O Codelp é um projeto de software em desenvolvimento ativo para compreender repositórios. O analisador atual suporta Python: descobre ficheiros, extrai importações e símbolos com Python AST, constrói índices determinísticos e divide o código em segmentos associados à sua localização na origem.
 
 O projeto guarda conhecimento com identidades estáveis e histórico, deteta alterações e permite análise incremental seletiva. Um grafo de conhecimento permite explorar dependências, duplicados, semelhanças e evolução. A pesquisa produz contexto com fontes rastreáveis, recorrendo a embeddings opcionais ou a uma alternativa de pesquisa lexical determinística.
 

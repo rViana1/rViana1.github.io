@@ -2,9 +2,9 @@
   <div class="container footer-inner">
     <p>© {{ site.time | date: '%Y' }} Ricardo Viana · {% include i18n.html en="Last updated" pt="Última atualização" %} - <time datetime="{{ site.last_updated | escape }}">{{ site.last_updated | date: '%d/%m/%Y' }}</time></p>
     <div class="footer-links">
-      <a href="mailto:{{ site.data.contacts.email | escape }}">{% include icon.html name="mail" %}Email</a>
-      <a href="{{ site.data.contacts.linkedin | escape }}" target="_blank" rel="noopener noreferrer">LinkedIn{% include icon.html name="external" %}</a>
-      <a href="{{ site.data.contacts.github | escape }}" target="_blank" rel="noopener noreferrer">GitHub{% include icon.html name="external" %}</a>
+      <a class="button" href="mailto:{{ site.data.contacts.email | escape }}">{% include icon.html name="mail" %}Email</a>
+      <a class="button" href="{{ site.data.contacts.linkedin | escape }}" target="_blank" rel="noopener noreferrer">{% include icon.html name="linkedin" %}LinkedIn</a>
+      <a class="button" href="{{ site.data.contacts.github | escape }}" target="_blank" rel="noopener noreferrer">{% include icon.html name="github" %}GitHub</a>
     </div>
   </div>
 </footer>

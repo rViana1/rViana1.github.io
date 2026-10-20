@@ -38,4 +38,5 @@
     - name: MySQL
     - name: MongoDB
     - name: Git
+    - name: Codex
     - name: Linux

@@ -119,9 +119,9 @@ class SourceSafetyTests(unittest.TestCase):
         cases = (
             ("admin/_data/ui.yml", "cta_contact:\n  en: Get in touch\n  pt: Entrar em contacto", "cta_contact: Get in touch"),
             ("admin/_data/profile.yml", "headline:\n  en: Junior Software Engineer\n  pt: Engenheiro de Software Júnior", "headline: Junior Software Engineer"),
-            ("admin/_data/profile.yml", "bio:\n  en: Computer Engineering graduate with a data engineering internship at Medana.ai. I build software projects and am continuing my studies with a master's in Informatics.\n  pt: Licenciado em Engenharia Informática, com um estágio em engenharia de dados na Medana.ai. Desenvolvo projetos de software e continuo a minha formação num mestrado em Informática.", "bio: Computer Engineering graduate"),
+            ("admin/_data/profile.yml", "bio:\n  en: I hold a bachelor’s degree in Computer Engineering and completed a Data Engineering internship at Medana.ai. I enjoy developing personal projects that solve everyday problems and make daily tasks simpler. My internship sparked my interest in pursuing a career in data, particularly in its applications to healthcare.\n  pt: Sou licenciado em Engenharia Informática e realizei um estágio em Engenharia de Dados na Medana.ai. Gosto de desenvolver projetos pessoais que resolvam problemas do meu dia a dia e tornem as tarefas quotidianas mais simples. A experiência de estágio despertou o meu interesse em seguir uma carreira na área dos dados, com particular interesse nas suas aplicações à saúde.", "bio: Computer Engineering graduate"),
             ("admin/_data/profile.yml", "focus:\n  en: Software development and data engineering\n  pt: Desenvolvimento de software e engenharia de dados", "focus: Software development"),
-            ("admin/_data/contacts.yml", "location:\n  en: Portugal\n  pt: Portugal", "location: Portugal"),
+            ("admin/_data/contacts.yml", "location:\n  en: Bragança, Portugal\n  pt: Bragança, Portugal", "location: Portugal"),
             ("admin/_data/nav.yml", "  label:\n    en: Home\n    pt: Início", "  label: Home"),
             ("admin/_data/skills.yml", "- group:\n    en: Data engineering\n    pt: Engenharia de dados", "- group: Data engineering"),
             ("admin/_data/skills.yml", "  evidence:\n    en: Applied during the Medana.ai internship.\n    pt: Aplicação durante o estágio na Medana.ai.", "  evidence: Applied during the internship"),
@@ -173,7 +173,7 @@ class PortfolioContentTests(unittest.TestCase):
             "email": "ricardojcviana@gmail.com",
             "linkedin": "https://www.linkedin.com/in/rviana01/",
             "github": "https://github.com/rViana1",
-            "location": {"en": "Portugal", "pt": "Portugal"},
+            "location": {"en": "Bragança, Portugal", "pt": "Bragança, Portugal"},
         }, contacts)
         profile = self.yaml(self.root / "admin/_data/profile.yml")
         self.assertEqual("Ricardo Viana", profile["name"])
@@ -197,7 +197,7 @@ class PortfolioContentTests(unittest.TestCase):
         expected = {
             "_experience": {"medana-ai", "screen-printing", "hockey-coach"},
             "_education": {"masters-informatics", "computer-engineering", "programming-technician", "python-iefp"},
-            "_projects": {"codelp", "bionic-hand"},
+            "_projects": {"codelp", "bionic-hand", "medcalc"},
             "_hobbies": {"roller-hockey"},
         }
         for collection, slugs in expected.items():
@@ -217,14 +217,14 @@ class PortfolioContentTests(unittest.TestCase):
                     self.assertEqual(1, body.count("<!--pt-->"))
                     self.assertTrue(all(len(part.strip()) > 30 for part in body.split("<!--pt-->")))
 
-    def test_exactly_three_launch_projects_reuse_medana_experience(self):
+    def test_four_projects_reuse_medana_experience(self):
         projects = []
         for collection in ("_projects", "_experience"):
             for path in (self.root / "admin" / collection).glob("*.md"):
                 metadata = self.yaml(path, front_matter=True)
                 if collection == "_projects" or metadata.get("featured_project"):
                     projects.append((metadata["project_order"], path.stem))
-        self.assertEqual([(1, "medana-ai"), (2, "codelp"), (3, "bionic-hand")], sorted(projects))
+        self.assertEqual([(1, "medana-ai"), (2, "codelp"), (3, "bionic-hand"), (4, "medcalc")], sorted(projects))
         self.assertEqual(1, len(list((self.root / "admin").rglob("medana-ai.md"))))
         codelp = self.yaml(self.root / "admin/_projects/codelp.md", front_matter=True)
         self.assertEqual("active", codelp["status"])
@@ -242,7 +242,7 @@ class PortfolioContentTests(unittest.TestCase):
         self.assertEqual({
             "Java", "C#", "C", "JavaScript", "SQL", "Python", "Pandas", "regex", "OCR", "ETL",
             "CSV/JSON", "AWS Bedrock/LLM evaluation", "React", "React Native", "HTML", "CSS", "Git",
-            "Linux", "MySQL", "MongoDB",
+            "Linux", "MySQL", "MongoDB", "Codex",
         }, {item["name"] for group in skills for item in group["items"]})
         for group in skills:
             self.bilingual(group["group"])
@@ -388,20 +388,44 @@ end
                 if photos:
                     self.assertIn('alt=""', photos[0])
 
-    def test_projects_have_three_cards_with_correct_detail_destinations(self):
+    def test_home_header_reserves_the_photo_space_without_an_image(self):
+        home = self.rendered['pages']['/']
+        header = re.search(r'<header class="site-header">.*?</header>', home, re.S).group()
+        self.assertIn('class="brand-photo-placeholder" aria-hidden="true"', header)
+        self.assertNotIn('src="/images/profile/ricardo-viana.webp"', header)
+
+    def test_contact_page_has_three_links_and_a_location_card(self):
+        html = self.rendered['pages']['/contacts/']
+        cards = re.findall(r'<(?:a|div) class="contact-card"[^>]*>.*?</(?:a|div)>', html, re.S)
+        self.assertEqual(4, len(cards))
+        for card, target in zip(cards[:3], ('mailto:ricardojcviana@gmail.com', 'https://www.linkedin.com/in/rviana01/', 'https://github.com/rViana1')):
+            self.assertIn(f'href="{target}"', card)
+        self.assertTrue(cards[3].startswith('<div'))
+        self.assertIn('Bragança, Portugal', cards[3])
+        self.assertIn('Location', cards[3])
+        self.assertIn('Localização', cards[3])
+
+    def test_projects_have_four_cards_with_correct_detail_destinations(self):
         for route in ('/', '/projects/'):
             html = self.rendered['pages'][route]
-            self.assertEqual(3, html.count('class="project-card"'))
+            self.assertEqual(4, html.count('class="project-card"'))
             cards = re.findall(r'<article class="project-card">(.*?)</article>', html, re.S)
-            for card, destination in zip(cards, ('/experience/medana-ai/', '/projects/codelp/', '/projects/bionic-hand/')):
+            for card, destination in zip(cards, ('/experience/medana-ai/', '/projects/codelp/', '/projects/bionic-hand/', '/projects/medcalc/')):
                 self.assertIn(f'href="{destination}"', card)
             self.assertNotIn('/projects/medana-ai/', html)
 
+    def test_project_details_highlight_projects_in_navigation(self):
+        for route in ('/projects/codelp/', '/projects/medcalc/', '/projects/bionic-hand/', '/experience/medana-ai/'):
+            with self.subTest(route=route):
+                header = re.search(r'<header class="site-header">.*?</header>', self.rendered['pages'][route], re.S).group()
+                self.assertIn('href="/projects/" aria-current="page"', header)
+                self.assertEqual(1, header.count('aria-current="page"'))
+
     def test_timelines_and_detail_navigation_cover_all_collections(self):
         for collection, slugs in {
-            'experience': ['medana-ai', 'screen-printing', 'hockey-coach'],
-            'education': ['masters-informatics', 'computer-engineering', 'programming-technician', 'python-iefp'],
-            'projects': ['codelp', 'bionic-hand'],
+            'experience': ['medana-ai', 'hockey-coach'],
+            'education': ['programming-technician', 'python-iefp', 'computer-engineering', 'masters-informatics'],
+            'projects': ['codelp', 'bionic-hand', 'medcalc'],
             'hobbies': ['roller-hockey'],
         }.items():
             listing = self.rendered['pages'][f'/{collection}/']
@@ -417,6 +441,10 @@ end
                         self.assertIn(f'rel="prev" href="/{collection}/{slugs[i-1]}/"', detail)
                     if i < len(slugs) - 1:
                         self.assertIn(f'rel="next" href="/{collection}/{slugs[i+1]}/"', detail)
+
+    def test_next_link_has_right_alignment_when_it_is_the_only_link(self):
+        detail = self.rendered['pages']['/projects/codelp/']
+        self.assertRegex(detail, r'class="back-link detail-next" rel="next"')
 
     def test_period_handles_missing_single_and_equal_endpoints(self):
         empty, end_only, start_only, both, equal = self.rendered['periods']

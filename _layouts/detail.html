@@ -5,6 +5,7 @@ layout: default
 {% assign body_parts = content | split: '<!--pt-->' %}
 <article class="detail container section">
   <header class="detail-hero">
+    <div{% if page.cover or page.slug == 'codelp' %} class="detail-hero-grid"{% endif %}><div>
     <a class="back-link" href="{{ '/' | append: page.collection | append: '/' | relative_url }}">{% include icon.html name="arrow-left" %}{% include t.html k=back_key %}</a>
     <div class="tags">{% include tags.html tags=page.tags %}</div>
     <h1>{% include title.html item=page %}</h1>
@@ -12,7 +13,7 @@ layout: default
     {% if page.start or page.end %}<p class="meta">{% include period.html start=page.start end=page.end %}</p>{% endif %}
     {% if page.status %}<p class="status">{% include t.html k=page.status %}</p>{% endif %}
     <p class="lead">{% include i18n.html en=page.summary.en pt=page.summary.pt %}</p>
-    {% if page.cover or page.slug == 'codelp' %}{% include media.html item=page class="detail-cover" %}{% endif %}
+    </div>{% if page.cover or page.slug == 'codelp' %}{% if page.collection == 'projects' and page.slug == 'bionic-hand' %}{% include media.html item=page class="detail-cover detail-cover-portrait" %}{% else %}{% include media.html item=page class="detail-cover" %}{% endif %}{% endif %}</div>
   </header>
   <div class="detail-grid">
     <div>
@@ -28,11 +29,12 @@ layout: default
     {% if page.tech or page.links %}
     <aside class="detail-side">
       {% if page.tech %}<section class="panel"><h2>{% include t.html k="tech_stack" %}</h2><ul class="chips">{% for tech in page.tech %}<li>{{ tech | escape }}</li>{% endfor %}</ul></section>{% endif %}
-      {% if page.links %}<section class="panel"><h2>{% include t.html k="links" %}</h2><ul class="link-list">{% for link in page.links %}<li><a href="{{ link.url | escape }}" target="_blank" rel="noopener noreferrer">{% include i18n.html en=link.label.en pt=link.label.pt %}{% include icon.html name="external" %}</a></li>{% endfor %}</ul></section>{% endif %}
+      {% if page.links %}<section class="panel"><h2>{% include t.html k="links" %}</h2><ul class="link-list">{% for link in page.links %}<li><a{% if link.url contains 'github.com/' or link.url contains 'linkedin.com/' or link.url contains 'mailto:' %} class="button"{% endif %} href="{{ link.url | escape }}"{% unless link.url contains 'mailto:' %} target="_blank" rel="noopener noreferrer"{% endunless %}>{% if link.url contains 'github.com/' %}{% include icon.html name="github" %}{% elsif link.url contains 'linkedin.com/' %}{% include icon.html name="linkedin" %}{% elsif link.url contains 'mailto:' %}{% include icon.html name="mail" %}{% endif %}{% include i18n.html en=link.label.en pt=link.label.pt %}{% unless link.url contains 'github.com/' or link.url contains 'linkedin.com/' or link.url contains 'mailto:' %}{% include icon.html name="external" %}{% endunless %}</a></li>{% endfor %}</ul></section>{% endif %}
     </aside>
     {% endif %}
   </div>
   {% assign collection_items = site[page.collection] | sort: 'order' %}
+  {% if page.collection == 'education' %}{% assign collection_items = collection_items | reverse %}{% endif %}
   {% for item in collection_items %}
     {% if item.url == page.url and collection_items.size > 1 %}
       {% assign previous_index = forloop.index0 | minus: 1 %}
@@ -44,7 +46,7 @@ layout: default
         {% endunless %}
         {% unless forloop.last %}
         {% assign next_item = collection_items[next_index] %}
-        <a class="back-link" rel="next" href="{{ next_item.url | relative_url }}"><span>{% include i18n.html en="Next" pt="Seguinte" %}: {% include title.html item=next_item %}</span>{% include icon.html name="arrow-right" %}</a>
+        <a class="back-link detail-next" rel="next" href="{{ next_item.url | relative_url }}"><span>{% include i18n.html en="Next" pt="Seguinte" %}: {% include title.html item=next_item %}</span>{% include icon.html name="arrow-right" %}</a>
         {% endunless %}
       </nav>
     {% endif %}

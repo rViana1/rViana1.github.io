@@ -1,4 +1,5 @@
 ---
+published: false
 title:
   en: Screen printing
   pt: Serigrafia

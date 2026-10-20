@@ -12,6 +12,10 @@ start: "2025-09"
 end: "2026-05"
 order: 1
 featured_project: true
+cover: /images/experience/medana-ai/logo.png
+cover_width: 272
+cover_height: 88
+cover_fit: contain
 project_order: 1
 tags: [internship]
 tech: [Python, Pandas, regex, OCR, ETL, CSV/JSON, AWS Bedrock]

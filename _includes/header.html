@@ -1,10 +1,10 @@
 <header class="site-header">
   <div class="container header-inner">
-    <a class="brand" href="{{ '/' | relative_url }}">{% unless page.url == '/' %}<img class="brand-photo" src="{{ '/images/profile/ricardo-viana.webp' | relative_url }}" alt="" width="38" height="38">{% endunless %}Ricardo Viana</a>
+    <a class="brand" href="{{ '/' | relative_url }}">{% if page.url == '/' %}<span class="brand-photo-placeholder" aria-hidden="true"></span>{% else %}<img class="brand-photo" src="{{ '/images/profile/ricardo-viana.webp' | relative_url }}" alt="" width="54" height="54" decoding="async">{% endif %}Ricardo Viana</a>
     <nav id="site-nav" class="site-nav" aria-label="Main navigation / Navegação principal">
       <ul>
         {% for item in site.data.nav %}{% if item.show %}
-        <li><a href="{{ item.url | relative_url }}"{% if page.url == item.url %} aria-current="page"{% endif %}>{% include i18n.html en=item.label.en pt=item.label.pt %}</a></li>
+        <li><a href="{{ item.url | relative_url }}"{% if page.url == item.url or item.url == '/projects/' and page.collection == 'projects' or item.url == '/projects/' and page.featured_project %} aria-current="page"{% endif %}>{% include i18n.html en=item.label.en pt=item.label.pt %}</a></li>
         {% endif %}{% endfor %}
       </ul>
     </nav>

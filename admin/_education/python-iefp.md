@@ -8,7 +8,7 @@ subtitle:
 summary:
   en: Supplementary Python training through IEFP.
   pt: Formação complementar em Python através do IEFP.
-order: 4
+order: 3
 tags: [course]
 tech: [Python]
 highlights:
