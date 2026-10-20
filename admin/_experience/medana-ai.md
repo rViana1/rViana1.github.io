@@ -31,8 +31,12 @@ From September 2025 to May 2026, I worked as a Data Engineering Intern at Medana
 
 The work covered approximately 55,000 files, more than 10 automation scripts and approximately 27 hours of automated filtering. I also worked on LLM evaluation using AWS Bedrock. The internship received a grade of 18/20.
 
+I also contributed to prompt optimisation for language models, aiming to improve the structured extraction of clinical information and the quality of the results.
+
 <!--pt-->
 
 Entre setembro de 2025 e maio de 2026, realizei um estágio em Engenharia de Dados na Medana.ai. O trabalho envolveu a preparação e o processamento de dados com Python e Pandas, recorrendo a expressões regulares, OCR e processos de ETL com ficheiros CSV e JSON.
 
 O trabalho abrangeu cerca de 55 000 ficheiros, mais de 10 scripts de automação e cerca de 27 horas de filtragem automatizada. Trabalhei também na avaliação de LLM com AWS Bedrock. O estágio teve a classificação de 18/20.
+
+Participei também na otimização de prompts para modelos de linguagem, com o objetivo de melhorar a extração estruturada de informação clínica e a qualidade dos resultados.
